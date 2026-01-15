@@ -34,6 +34,8 @@ const toastVariants = cva(
           "border-success bg-success text-success-foreground",
         warning: // AÑADIDO: Soporte para la variante 'warning'
           "border-warning bg-warning text-warning-foreground",
+        info: // FIX TS2322: Añadido soporte para la variante 'info' (usando primary color)
+          "border-primary bg-primary text-primary-foreground",
       },
     },
     defaultVariants: {

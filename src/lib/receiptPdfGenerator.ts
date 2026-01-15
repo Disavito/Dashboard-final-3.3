@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { ReciboPagoFormValues } from './types/invoicing';
+// Importación de ReciboPagoFormValues eliminada ya que ReceiptData se define explícitamente
+// import { ReciboPagoFormValues } from './types/invoicing'; 
 
 // --- Lógica de Conversión de Números a Letras ---
 
@@ -52,12 +53,19 @@ export function amountToWords(amount: number): string {
 
 // --- Tipos para la Generación de PDF ---
 
-interface ReceiptData extends ReciboPagoFormValues {
+/**
+ * FIX TS2345: Redefinido para incluir SOLO los campos públicos necesarios para el PDF.
+ * Los campos de observación interna se excluyen por completo.
+ */
+interface ReceiptData {
     correlative: string;
     client_full_name: string;
     client_dni: string;
-    // NUEVO: Detalle de observación de pago
-    payment_observation_detail: string | null; 
+    fecha_emision: string;
+    monto: number;
+    concepto: string;
+    metodo_pago: string; // Usamos string genérico para evitar problemas de tipado de enum
+    numero_operacion: string | undefined;
 }
 
 /**
@@ -79,15 +87,10 @@ const generateReceiptHtml = (data: ReceiptData): string => {
     const primaryColor = '#003366';
     const textColor = '#212529';
     const secondaryTextColor = '#6c757d';
-    const warningColor = '#f59e0b'; // Usamos el color de advertencia para la observación de pago
+    // const warningColor = '#f59e0b'; // Eliminado, ya no se usa para la observación
 
-    // HTML condicional para la observación de pago
-    const observationHtml = data.payment_observation_detail ? `
-        <div class="detail-row observation-row" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
-            <span class="detail-label" style="color: ${warningColor}; font-weight: bold;">OBSERVACIÓN DE PAGO:</span>
-            <span class="detail-value" style="color: ${warningColor}; font-weight: 600; font-size: 11pt;">${data.payment_observation_detail}</span>
-        </div>
-    ` : '';
+    // HTML condicional para la observación de pago ELIMINADO, ya que es interno.
+    const observationHtml = '';
 
 
     return `
@@ -171,15 +174,7 @@ const generateReceiptHtml = (data: ReceiptData): string => {
                 .summary-total-row td { font-size: 16pt; font-weight: bold; }
                 .footer { margin-top: auto; padding-top: 50px; text-align: center; }
                 .signature-line { width: 280px; margin: 0 auto; border-top: 1px solid #343a40; padding-top: 8px; font-size: 10pt; font-weight: bold; color: #343a40; }
-                .observation-row { 
-                    border: 2px solid ${warningColor}; 
-                    background-color: rgba(245, 158, 11, 0.1); 
-                    padding: 10px; 
-                    border-radius: 8px;
-                    display: block;
-                }
-                .observation-row .detail-label { width: auto; margin-right: 10px; }
-                .observation-row .detail-value { display: block; margin-top: 5px; }
+                /* .observation-row styles removed */
             </style>
             
             <div class="receipt-main-content">
